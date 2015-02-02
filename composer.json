@@ -1,7 +1,7 @@
 {
     "name": "wetcat/neo",
     "description": "Basic Laravel wrapper for neoxygen/neo4j-neoclient",
-    "keywords": ["Neo4j", "Laravel", "neoxygen", "neo4j-neoclient", "neoxygen/neo4j-neoclient"],
+    "keywords": ["Neo4j", "Laravel", "neoxygen", "neo4j-neoclient"],
     "authors": [
         {
             "name": "Andreas Göransson",
