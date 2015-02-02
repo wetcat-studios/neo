@@ -1,0 +1,25 @@
+{
+    "name": "wetcat/neo",
+    "description": "Basic Laravel wrapper for neoxygen/neo4j-neoclient",
+    "keywords": ["Neo4j", "Laravel", "neoxygen", "neo4j-neoclient", "neoxygen/neo4j-neoclient"],
+    "authors": [
+        {
+            "name": "Andreas Göransson",
+            "email": "ag@santiclaws.se"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "4.2.*",
+        "neoxygen/neoclient": "~2.0"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Wetcat\\Neo\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
