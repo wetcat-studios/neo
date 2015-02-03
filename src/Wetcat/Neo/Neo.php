@@ -1,6 +1,8 @@
 <?php namespace Wetcat\Neo;
  
 use Neoxygen\NeoClient\ClientBuilder;
+use Wetcat\Neo\Users\ProviderInterface as UserProviderInterface;
+use Wetcat\Neo\Groups\ProviderInterface as GroupProviderInterface;
 
 class Neo {
  
