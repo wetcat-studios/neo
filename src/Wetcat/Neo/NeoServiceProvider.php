@@ -32,6 +32,8 @@ class NeoServiceProvider extends ServiceProvider {
     $this->registerUserProvider();
     $this->registerNeo();
 
+    $this->registerCommands();
+
     $this->app->booting(function()
     {
       $loader = \Illuminate\Foundation\AliasLoader::getInstance();
@@ -87,4 +89,21 @@ class NeoServiceProvider extends ServiceProvider {
       );
     });
   }
+
+  protected function registerCommands()
+  {
+    $this->app->bind('wetcat::neo.create', function($app) {
+      return new CreateSchemaCommand();
+    });
+
+    $this->app->bind('wetcat::neo.remove', function($app) {
+      return new RemoveSchemaCommand();
+    });
+
+    $this->commands(array(
+        'wetcat::neo.create',
+        'wetcat::neo.remove'
+    ));
+  }
+
 }

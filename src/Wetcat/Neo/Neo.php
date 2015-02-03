@@ -29,19 +29,19 @@ class Neo {
   }
 
   public function unique($label, $prop) {
-    $this->client->createUniqueConstraint($label, $prop);
+    return $this->client->createUniqueConstraint($label, $prop);
   }
 
   public function dropUnique($label, $prop) {
-    $this->client->dropUniqueConstraint($label, $prop);
+    return $this->client->dropUniqueConstraint($label, $prop);
   }
 
   public function index($label, $prop) {
-    $this->client->createIndex($label, $prop);
+    return $this->client->createIndex($label, $prop);
   }
 
   public function dropIndex($label, $prop) {
-    $this->client->dropIndex($label, $prop);
+    return $this->client->dropIndex($label, $prop);
   }
 
   public function root() {
