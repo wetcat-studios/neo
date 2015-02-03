@@ -1,4 +1,5 @@
 <?php namespace Wetcat\Neo\Groups;
+
 /**
  * "Stolen" from Cartalyst/Sentry. =)
  *
@@ -24,11 +25,42 @@ use Wetcat\Neo\Groups\GroupInterface;
 use Wetcat\Neo\Groups\GroupNotFoundException;
 use Wetcat\Neo\Groups\ProviderInterface;
 
+use Config;
+
+use Neoxygen\NeoClient\ClientBuilder;
+
 class Provider implements ProviderInterface {
+
+  // Neo4j client
+  protected $client;
 
   protected $attributes = [
     'name',
   ];
+
+  /**
+   * Create a new Neo User provider.
+   *
+   * @param  \Neoxygen\NeoClient\ClientBuilder  $client
+   * @return void
+   */
+  public function __construct()
+  {
+    $this->alias   = Config::get('database.neo.default.alias', Config::get('neo::default.alias'));
+    $this->scheme  = Config::get('database.neo.default.scheme', Config::get('neo::default.scheme'));
+    $this->host    = Config::get('database.neo.default.host', Config::get('neo::default.host'));
+    $this->port    = Config::get('database.neo.default.port', Config::get('neo::default.port'));
+    $this->auth    = Config::get('database.neo.default.auth', Config::get('neo::default.auth'));
+    $this->user    = Config::get('database.neo.default.user', Config::get('neo::default.user'));
+    $this->pass    = Config::get('database.neo.default.pass', Config::get('neo::default.pass'));
+    $this->timeout = Config::get('database.neo.default.timeout', Config::get('neo::default.timeout'));
+
+    $this->client = ClientBuilder::create()
+      ->addConnection($this->alias, $this->scheme, $this->host, $this->port, $this->auth, $this->user, $this->pass)
+      ->setAutoFormatResponse(true)
+      ->setDefaultTimeout($this->timeout)
+      ->build();
+  }
 
   /**
    * Find the group by ID.
@@ -39,7 +71,9 @@ class Provider implements ProviderInterface {
    */
   public function findById($id)
   {
-    $result = Neo::query("START n=node($id) RETURN n");
+    $query = "START n=node($id) RETURN n";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
     $groupNode = $result->getSingleNode('Group');
 
     if ( !$groupNode )
@@ -47,7 +81,7 @@ class Provider implements ProviderInterface {
       throw new GroupNotFoundException("A group could not be found with ID [$id].");
     }
 
-    return $groupNode->getProperties($attributes);
+    return $groupNode->getProperties($this->attributes);
   }
 
   /**
@@ -59,7 +93,9 @@ class Provider implements ProviderInterface {
    */
   public function findByName($name)
   {
-    $result = Neo::query("MATCH (g:Group {name: '$name'}) RETURN g");
+    $query = "MATCH (g:Group {name: '$name'}) RETURN g";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
     $groupNode = $result->getSingleNode('Group');
 
     if ( !$groupNode )
@@ -67,7 +103,7 @@ class Provider implements ProviderInterface {
       throw new GroupNotFoundException("A group could not be found with the name [$name].");
     }
 
-    return $groupNode->getProperties($attributes);
+    return $groupNode->getProperties($this->attributes);
   }
 
   /**
@@ -77,16 +113,50 @@ class Provider implements ProviderInterface {
    */
   public function findAll()
   {
-    $result = Neo::query("MATCH (g:Group) RETURN g");
+    $query = "MATCH (g:Group) RETURN g";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
     $nodes = $result->getNodes();
 
     $data = [];
 
     foreach ($nodes as $node) {
-      $data[] = $node->getProperties($attributes);
+      $data[] = $node->getProperties($this->attributes);
     }
 
     return $data;
+  }
+
+  /**
+   * Find all users of a group
+   */
+  public function findAllInGroup($group)
+  {
+    $query = "MATCH (g:Group {name: '$group'})<-[r:MEMBER_OF]-(u:User) RETURN u";
+    $result = $this->client->sendCypherQuery($query)->getResult();
+
+    $nodes = [];
+    $edges = [];
+    
+    $nodesPositions = [];
+    
+    $i = 0;
+    foreach ($result->getNodes() as $node){
+      if ( $node->getLabel() === 'User' ){
+        $nodes[] = [
+          'id'        => $node->getId(),
+          'label'     => $node->getLabel(),
+          'firstname' => $node->getProperty('firstname'),
+          'lastname'  => $node->getProperty('lastname'),
+          'email'     => $node->getProperty('email'),
+        ];
+      }
+
+      $nodesPositions[$node->getId()] = $i;
+      $i++;
+    }
+    
+    return $nodes;
   }
 
   /**
@@ -95,18 +165,24 @@ class Provider implements ProviderInterface {
    * @param  array  $attributes
    * @return \Cartalyst\Sentry\Groups\GroupInterface
    */
-  public function create(array $attributes)
+  public function create(array $attrs)
   {
     $query = "CREATE (g:Group {";
+    $len = count($attrs);
+    $i = 0;
     foreach ($attrs as $key => $value) {
       $query .= $key.": '".$value."'";
+      $i++;
+      if( $i < $len ){
+        $query .= ", ";
+      }
     }
     $query .= "}) RETURN g";
 
-    $result = Neo::query($query);
+    $result = $this->client->sendCypherQuery($query)->getResult();
     $groupNode = $result->getSingleNode('Group');
 
-    return $groupNode->getProperties($attributes);
+    return $groupNode->getProperties($this->attributes);
   }
 
 }

@@ -1,9 +1,10 @@
 <?php namespace Wetcat\Neo;
 
-use Config;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
+
+use Config;
 use Neoxygen\NeoClient\ClientBuilder;
 
 class CreateSchemaCommand extends Command {

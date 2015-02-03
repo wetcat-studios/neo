@@ -4,6 +4,7 @@ use Illuminate\Support\ServiceProvider;
 use Wetcat\Neo\Neo;
 use Wetcat\Neo\Users\Provider as UserProvider;
 use Wetcat\Neo\Groups\Provider as GroupProvider;
+use Config;
 
 class NeoServiceProvider extends ServiceProvider {
 
@@ -63,7 +64,7 @@ class NeoServiceProvider extends ServiceProvider {
   {
     $this->app['neo.user'] = $this->app->share(function ($app)
     {
-      return new UserProvider;
+      return new UserProvider();
     });
   }
 
@@ -76,7 +77,7 @@ class NeoServiceProvider extends ServiceProvider {
   {
     $this->app['neo.group'] = $this->app->share(function ($app)
     {
-      return new GroupProvider;
+      return new GroupProvider();
     });
   }
 
@@ -89,14 +90,14 @@ class NeoServiceProvider extends ServiceProvider {
   {
     $this->app['neo'] = $this->app->share(function($app)
     {
-      $alias   = $app['config']->get('database.neo.default.alias', $app['config']->get('neo::default.alias'));
-      $scheme  = $app['config']->get('database.neo.default.scheme', $app['config']->get('neo::default.scheme'));
-      $host    = $app['config']->get('database.neo.default.host', $app['config']->get('neo::default.host'));
-      $port    = $app['config']->get('database.neo.default.port', $app['config']->get('neo::default.port'));
-      $auth    = $app['config']->get('database.neo.default.auth', $app['config']->get('neo::default.auth'));
-      $user    = $app['config']->get('database.neo.default.user', $app['config']->get('neo::default.user'));
-      $pass    = $app['config']->get('database.neo.default.pass', $app['config']->get('neo::default.pass'));
-      $timeout = $app['config']->get('database.neo.default.timeout', $app['config']->get('neo::default.timeout'));
+      $alias   = Config::get('database.neo.default.alias', Config::get('neo::default.alias'));
+      $scheme  = Config::get('database.neo.default.scheme', Config::get('neo::default.scheme'));
+      $host    = Config::get('database.neo.default.host', Config::get('neo::default.host'));
+      $port    = Config::get('database.neo.default.port', Config::get('neo::default.port'));
+      $auth    = Config::get('database.neo.default.auth', Config::get('neo::default.auth'));
+      $user    = Config::get('database.neo.default.user', Config::get('neo::default.user'));
+      $pass    = Config::get('database.neo.default.pass', Config::get('neo::default.pass'));
+      $timeout = Config::get('database.neo.default.timeout', Config::get('neo::default.timeout'));
     
       return new Neo(
         $app['neo.user'],

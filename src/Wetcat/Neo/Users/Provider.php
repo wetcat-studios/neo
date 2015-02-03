@@ -1,5 +1,8 @@
 <?php namespace Wetcat\Neo\Users;
+
 /**
+ * "Stolen" fron Cartalyst/Sentry. =)
+ *
  * Part of the Sentry package.
  *
  * NOTICE OF LICENSE
@@ -22,8 +25,19 @@ use Wetcat\Neo\Users\ProviderInterface;
 use Wetcat\Neo\Users\UserNotActivatedException;
 use Wetcat\Neo\Users\UserNotFoundException;
 use Wetcat\Neo\Users\WrongPasswordException;
+use Wetcat\Neo\Users\InvalidTokenException;
+
+use Config;
+use Hash;
+use Str;
+
+use Neoxygen\NeoClient\ClientBuilder;
+use Carbon\Carbon;
 
 class Provider implements ProviderInterface {
+
+  // Neo4j client
+  protected $client;
 
   protected $attributes = [
     'firstname',
@@ -34,6 +48,30 @@ class Provider implements ProviderInterface {
   ];
 
   /**
+   * Create a new Neo User provider.
+   *
+   * @param  \Neoxygen\NeoClient\ClientBuilder  $client
+   * @return void
+   */
+  public function __construct()
+  {
+    $this->alias   = Config::get('database.neo.default.alias', Config::get('neo::default.alias'));
+    $this->scheme  = Config::get('database.neo.default.scheme', Config::get('neo::default.scheme'));
+    $this->host    = Config::get('database.neo.default.host', Config::get('neo::default.host'));
+    $this->port    = Config::get('database.neo.default.port', Config::get('neo::default.port'));
+    $this->auth    = Config::get('database.neo.default.auth', Config::get('neo::default.auth'));
+    $this->user    = Config::get('database.neo.default.user', Config::get('neo::default.user'));
+    $this->pass    = Config::get('database.neo.default.pass', Config::get('neo::default.pass'));
+    $this->timeout = Config::get('database.neo.default.timeout', Config::get('neo::default.timeout'));
+
+    $this->client = ClientBuilder::create()
+      ->addConnection($this->alias, $this->scheme, $this->host, $this->port, $this->auth, $this->user, $this->pass)
+      ->setAutoFormatResponse(true)
+      ->setDefaultTimeout($this->timeout)
+      ->build();
+  }
+
+  /**
    * Finds a user by the given user ID.
    *
    * @param  mixed  $id
@@ -42,7 +80,9 @@ class Provider implements ProviderInterface {
    */
   public function findById($id)
   {
-    $result = Neo::query("START n=node($id) RETURN n");
+    $query = "START n=node($id) RETURN n";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
     $userNode = $result->getSingleNode('User');
 
     if ( !$userNode )
@@ -50,7 +90,7 @@ class Provider implements ProviderInterface {
       throw new UserNotFoundException("A user could not be found with ID [$id].");
     }
 
-    return $userNode->getProperties($attributes);
+    return $userNode->getProperties($this->attributes);
   }
 
   /**
@@ -62,7 +102,9 @@ class Provider implements ProviderInterface {
    */
   public function findByEmail($email)
   {
-    $result = Neo::query("MATCH (u:User {email: '$email'}) RETURN u");
+    $query = "MATCH (u:User {email: '$email'}) RETURN u";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
     $userNode = $result->getSingleNode('User');
 
     if ( !$userNode )
@@ -70,7 +112,58 @@ class Provider implements ProviderInterface {
       throw new UserNotFoundException("A user could not be found with a email value of [$email].");
     }
 
-    return $userNode->getProperties($attributes);
+    return $userNode->getProperties($this->attributes);
+  }
+
+  /**
+   * Finds a user by the token value.
+   *
+   * @param  string  $token
+   * @return array
+   * @throws \Wetcat\Neo\Users\UserNotFoundException
+   */
+  public function findByToken($token)
+  {
+    $query = "MATCH (u:User {token: '$token'}) RETURN u";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
+    $userNode = $result->getSingleNode('User');
+
+    if ( !$userNode )
+    {
+      throw new InvalidTokenException("The token [$token] is invalid.");
+    }
+
+    return $userNode->getProperties($this->attributes);
+  }
+
+  /**
+   * Finds a user by credentials.
+   *
+   * @param  string  $token
+   * @return array
+   * @throws \Wetcat\Neo\Users\UserNotFoundException
+   */
+  public function findByCredentials(array $credentials)
+  {
+    if (empty($credentials['email'])) {
+      throw new LoginRequiredException("The [email] attribute is required.");
+    }
+    if (empty($credentials['password'])) {
+      throw new PasswordRequiredException('The password attribute is required.');
+    }
+
+    $email = $credentials['email'];
+
+    $query = "MATCH (u:User {email: '$email'}) RETURN u";
+    $result = $this->client->sendCypherQuery($query)->getResult();
+    $userNode = $result->getSingleNode('User');
+
+    if (Hash::check($credentials['password'], $userNode->getProperty('password'))) {
+      return $userNode->getProperties($this->attributes);
+    } else {
+      throw new UserNotFoundException("A user could not be found with the given credentials.");
+    }
   }
 
   /**
@@ -89,7 +182,9 @@ class Provider implements ProviderInterface {
       throw new \InvalidArgumentException("No activation code passed.");
     }
 
-    $result = Neo::query("MATCH (u:User {activationcode: '$code'}) RETURN u");
+    $query = "MATCH (u:User {activationcode: '$code'}) RETURN u";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
     $nodes = $result->getNodes();
 
 
@@ -103,20 +198,22 @@ class Provider implements ProviderInterface {
       throw new UserNotFoundException("A user was not found with the given activation code.");
     }
 
-    return $userNode->getProperties($attributes);
+    return $userNode->getProperties($this->attributes);
   }
 
   /**
    * Finds a user by the given reset password code.
    *
    * @param  string  $code
-   * @return \Cartalyst\Sentry\Users\UserInterface
+   * @return \Wetcat\Neo\Users\UserInterface
    * @throws RuntimeException
-   * @throws \Cartalyst\Sentry\Users\UserNotFoundException
+   * @throws \Wetcat\Neo\Users\UserNotFoundException
    */
   public function findByResetPasswordCode($code)
   {
-    $result = Neo::query("MATCH (u:User {resetcode: '$code'}) RETURN u");
+    $query = "MATCH (u:User {resetcode: '$code'}) RETURN u";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
     $nodes = $result->getNodes();
 
 
@@ -130,7 +227,7 @@ class Provider implements ProviderInterface {
       throw new UserNotFoundException("A user was not found with the given reset password code.");
     }
 
-    return $userNode->getProperties($attributes);
+    return $userNode->getProperties($this->attributes);
   }
 
   /**
@@ -140,13 +237,15 @@ class Provider implements ProviderInterface {
    */
   public function findAll()
   {
-    $result = Neo::query("MATCH (u:User) RETURN u");
+    $query = "MATCH (u:User) RETURN u";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
     $nodes = $result->getNodes();
 
     $data = [];
 
     foreach ($nodes as $node) {
-      $data[] = $node->getProperties($attributes);
+      $data[] = $node->getProperties($this->attributes);
     }
 
     return $data;
@@ -161,13 +260,15 @@ class Provider implements ProviderInterface {
    */
   public function findAllInGroup($group)
   {
-    $result = Neo::query("MATCH (u:User)-[:MEMBER_OF]->(g:Group {name: '$group'}) RETURN u");
+    $query = "MATCH (u:User)-[:MEMBER_OF]->(g:Group {name: '$group'}) RETURN u";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
     $nodes = $result->getNodes();
 
     $data = [];
 
     foreach ($nodes as $node) {
-      $data[] = $node->getProperties($attributes);
+      $data[] = $node->getProperties($this->attributes);
     }
 
     return $data;
@@ -181,16 +282,99 @@ class Provider implements ProviderInterface {
    */
   public function create(array $attrs)
   {
+    // Hash password
+    $attrs['password'] = Hash::make($attrs['password']);
+    
+    $attrs['token'] = hash('sha256', Str::random(10), false);
+
     $query = "CREATE (u:User {";
+    $len = count($attrs);
+    $i = 0;
     foreach ($attrs as $key => $value) {
       $query .= $key.": '".$value."'";
+      $i++;
+      if( $i < $len ){
+        $query .= ", ";
+      }
     }
     $query .= "}) RETURN u";
 
-    $result = Neo::query($query);
+    $result = $this->client->sendCypherQuery($query)->getResult();
     $userNode = $result->getSingleNode('User');
 
-    return $userNode->getProperties($attributes);
+    return $userNode->getProperties($this->attributes);
+  }
+
+  /**
+   * Add a user (email) to a group (name)
+   *
+   * @param  string  $email
+   * @param  string  $group
+   */
+  public function addToGroup($email, $group) {
+    // Get the current timestamp
+    $mytime = Carbon::now();
+    $timestamp = $mytime->toDateTimeString();
+
+    $query = "MATCH (u:User {email: '$email'})
+              MATCH (g:Group {name: '$group'})
+              CREATE UNIQUE (u)-[r:MEMBER_OF {since: '$timestamp'}]->(g)
+              RETURN u, r, g";
+    $result = $this->client->sendCypherQuery($query)->getResult();
+
+    $nodes = [];
+    $edges = [];
+    
+    $nodesPositions = [];
+    
+    $i = 0;
+    foreach ($result->getNodes() as $node){
+      if ( $node->getLabel() === 'User' ){
+        $nodes[] = [
+          'id'        => $node->getId(),
+          'label'     => $node->getLabel(),
+          'firstname' => $node->getProperty('firstname'),
+          'lastname'  => $node->getProperty('lastname'),
+          'email'     => $node->getProperty('email'),
+        ];
+      }else if ( $node->getLabel() === "Group"){
+        $nodes[] = [
+          'id'        => $node->getId(),
+          'label'     => $node->getLabel(),
+          'name'      => $node->getProperty('name'),
+        ];
+      }
+
+      $nodesPositions[$node->getId()] = $i;
+      $i++;
+    }
+
+    foreach ($result->getRelationships() as $rel){
+      $edges[] = [
+        'source' => $nodesPositions[$rel->getStartNode()->getId()],
+        'target' => $nodesPositions[$rel->getEndNode()->getId()],
+      ];
+    }
+
+    $data = [
+        'nodes' => $nodes,
+        'edges' => $edges
+    ];
+
+    return $data;
+  }
+
+  /**
+   * Validate if a user is member of group
+   */
+  public function isMemberOf($email, $group)
+  {
+    $query = "MATCH (u:User {email: '$email'})-[r:MEMBER_OF]->(g:Group {name: '$group'}) RETURN count(g) as member";
+    $result = $this->client->sendCypherQuery($query)->getRows();
+
+    $member = $result['member'][0];
+
+    return $member;
   }
 
 }

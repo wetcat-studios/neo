@@ -1,4 +1,5 @@
 <?php namespace Wetcat\Neo\Users;
+
 /**
  * "Stolen" from Cartalyst/Sentry. =)
  *
@@ -27,3 +28,4 @@ class UserNotFoundException extends \OutOfBoundsException {}
 class UserNotActivatedException extends \RuntimeException {}
 class UserExistsException extends \UnexpectedValueException {}
 class WrongPasswordException extends UserNotFoundException {}
+class InvalidTokenException extends \OutOfBoundsException {}

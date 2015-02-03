@@ -15,7 +15,11 @@
     },
     "autoload": {
         "classmap": [
-            "src/migrations"
+            "src/migrations",
+            "src/Wetcat/Neo/filters.php"
+            "src/Wetcat/Neo/Exceptions.php",
+            "src/Wetcat/Neo/Groups/Exceptions.php",
+            "src/Wetcat/Neo/Users/Exceptions.php"
         ],
         "psr-0": {
             "Wetcat\\Neo\\": "src/"

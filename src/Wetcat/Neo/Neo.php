@@ -1,8 +1,12 @@
 <?php namespace Wetcat\Neo;
- 
-use Neoxygen\NeoClient\ClientBuilder;
+
 use Wetcat\Neo\Users\ProviderInterface as UserProviderInterface;
 use Wetcat\Neo\Groups\ProviderInterface as GroupProviderInterface;
+use Wetcat\Neo\NotAuthenticatedException;
+use Wetcat\Neo\NotAuthorizedException;
+use Wetcat\Neo\Users\InvalidTokenException;
+
+use Neoxygen\NeoClient\ClientBuilder;
 
 class Neo {
  
@@ -29,14 +33,14 @@ class Neo {
     $timeout = 25
   )
   {
-    $this->userProvider     = $userProvider ?: new UserProvider;
-    $this->groupProvider    = $groupProvider ?: new GroupProvider;
-
     $this->client = ClientBuilder::create()
       ->addConnection($alias, $scheme, $host, $port, $auth, $user, $pass)
       ->setAutoFormatResponse(true)
       ->setDefaultTimeout($timeout)
       ->build();
+
+    $this->userProvider     = $userProvider ?: new UserProvider($this->client);
+    $this->groupProvider    = $groupProvider ?: new GroupProvider($this->client);
   }
 
   public function unique($label, $prop) {
@@ -122,6 +126,80 @@ class Neo {
   public function getGroupProvider()
   {
     return $this->groupProvider;
+  }
+
+
+  // Auth stuff
+  /**
+   * Attempts to authenticate the given user
+   * according to the passed credentials.
+   *
+   * @param  array  $credentials
+   * @param  bool   $remember
+   * @return bool
+   * @throws \Wetcat\Neo\Users\LoginRequiredException
+   * @throws \Wetcat\Neo\Users\PasswordRequiredException
+   * @throws \Wetcat\Neo\Users\UserNotFoundException
+   */
+  public function authenticate(array $credentials)
+  {
+    if (empty($credentials['email'])) {
+      throw new LoginRequiredException("The [email] attribute is required.");
+    }
+    if (empty($credentials['password'])) {
+      throw new PasswordRequiredException('The password attribute is required.');
+    }
+
+    try {
+      $user = $this->userProvider->findByCredentials($credentials);
+    } catch (UserNotFoundException $e) {
+      throw $e;
+    }
+    
+//    $user->clearResetPassword();
+
+    return true;
+  }
+
+  /**
+   * Gets the group provider for Neo.
+   *
+   * @return \Wetcat\Neo\Groups\ProviderInterface
+   */
+  public function isAuthenticated($token) {
+    // Attempting to find the user will automatically throw errors if unsuccessful
+    try {
+      $user = $this->userProvider->findByToken($token);
+
+      if( ! (array_key_exists('email', $user) && array_key_exists('password', $user)) ){
+        throw new NotAuthenticatedException("The user with token [$token] is not authenticated.");
+      } else {
+        return true;
+      }
+    } catch (\Wetcat\Neo\Users\InvalidTokenException $e) {
+      return false;
+    }
+  }
+  /**
+   * Gets the group provider for Neo.
+   *
+   * @return \Wetcat\Neo\Groups\ProviderInterface
+   */
+  public function isAuthorized($token, $group) {
+    // Attempting to find the user will automatically throw errors if unsuccessful
+    try {
+      $user = $this->userProvider->findByToken($token);
+      $data = $this->userProvider->isMemberOf($user['email'], $group);
+    } catch (\Wetcat\Neo\Users\InvalidTokenException $e) {
+      return false;
+    }
+    
+
+    if( $data === 0 ) {
+      throw new NotAuthorizedException("The user with token [$token] is not authorized [$group]");
+    } else if( $data === 1 ) {
+      return true;
+    }
   }
  
 }
