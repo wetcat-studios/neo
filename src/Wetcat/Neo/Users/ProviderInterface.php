@@ -28,8 +28,8 @@ interface ProviderInterface {
    * Finds a user by the given user ID.
    *
    * @param  mixed  $id
-   * @return \Cartalyst\Sentry\Users\UserInterface
-   * @throws \Cartalyst\Sentry\Users\UserNotFoundException
+   * @return array
+   * @throws \Wetcat\Neo\Users\UserNotFoundException
    */
   public function findById($id);
 
@@ -37,8 +37,8 @@ interface ProviderInterface {
    * Finds a user by the login value.
    *
    * @param  string  $login
-   * @return \Cartalyst\Sentry\Users\UserInterface
-   * @throws \Cartalyst\Sentry\Users\UserNotFoundException
+   * @return array
+   * @throws \Wetcat\Neo\Users\UserNotFoundException
    */
   public function findByLogin($login);
 
@@ -46,8 +46,8 @@ interface ProviderInterface {
    * Finds a user by the given credentials.
    *
    * @param  array  $credentials
-   * @return \Cartalyst\Sentry\Users\UserInterface
-   * @throws \Cartalyst\Sentry\Users\UserNotFoundException
+   * @return array
+   * @throws \Wetcat\Neo\Users\UserNotFoundException
    */
   public function findByCredentials(array $credentials);
 
@@ -55,8 +55,8 @@ interface ProviderInterface {
    * Finds a user by the given activation code.
    *
    * @param  string  $code
-   * @return \Cartalyst\Sentry\Users\UserInterface
-   * @throws \Cartalyst\Sentry\Users\UserNotFoundException
+   * @return array
+   * @throws \Wetcat\Neo\Users\UserNotFoundException
    * @throws InvalidArgumentException
    * @throws RuntimeException
    */
@@ -66,9 +66,9 @@ interface ProviderInterface {
    * Finds a user by the given reset password code.
    *
    * @param  string  $code
-   * @return \Cartalyst\Sentry\Users\UserInterface
+   * @return array
    * @throws RuntimeException
-   * @throws \Cartalyst\Sentry\Users\UserNotFoundException
+   * @throws \Wetcat\Neo\Users\UserNotFoundException
    */
   public function findByResetPasswordCode($code);
 
@@ -83,16 +83,16 @@ interface ProviderInterface {
    * Returns all users who belong to
    * a group.
    *
-   * @param  \Cartalyst\Sentry\Groups\GroupInterface  $group
+   * @param  string  $group
    * @return array
    */
-  public function findAllInGroup(GroupInterface $group);
+  public function findAllInGroup($group);
 
   /**
    * Creates a user.
    *
    * @param  array  $credentials
-   * @return \Cartalyst\Sentry\Users\UserInterface
+   * @return array
    */
   public function create(array $credentials);
 
