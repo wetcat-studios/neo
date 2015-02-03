@@ -179,7 +179,7 @@ class Provider implements ProviderInterface {
    * @param  array  $attrs
    * @return array
    */
-  public static function create(array $attrs)
+  public function create(array $attrs)
   {
     $query = "CREATE (u:User {";
     foreach ($attrs as $key => $value) {
