@@ -30,6 +30,7 @@ class NeoServiceProvider extends ServiceProvider {
   public function register()
   {
     $this->registerUserProvider();
+    $this->registerGroupProvider();
     $this->registerNeo();
 
     $this->registerCommands();
@@ -52,7 +53,7 @@ class NeoServiceProvider extends ServiceProvider {
   }
 
   /**
-   * Register the user provider used by Sentry.
+   * Register the user provider used by Neo.
    *
    * @return void
    */
@@ -60,9 +61,20 @@ class NeoServiceProvider extends ServiceProvider {
   {
     $this->app['neo.user'] = $this->app->share(function ($app)
     {
-      $model = $app['config']['cartalyst/sentry::users.model'];
+      return new UserProvider;
+    });
+  }
 
-      return new UserProvider($app['sentry.hasher'], $model);
+  /**
+   * Register the group provider used by Neo.
+   *
+   * @return void
+   */
+  protected function registerGroupProvider()
+  {
+    $this->app['neo.group'] = $this->app->share(function ($app)
+    {
+      return new GroupProvider;
     });
   }
 

@@ -7,10 +7,16 @@ class Neo {
   // Neo4j client
   protected $client;
 
+  protected $groupProvider;
+
+  protected $userProvider;
+
   /**
    * Create a new Neo object.
    */
   public function __construct(
+    UserProviderInterface $userProvider = null,
+    GroupProviderInterface $groupProvider = null,
     $alias = 'default',
     $scheme = 'http',
     $host = 'localhost',
@@ -21,6 +27,9 @@ class Neo {
     $timeout = 25
   )
   {
+    $this->userProvider     = $userProvider ?: new UserProvider;
+    $this->groupProvider    = $groupProvider ?: new GroupProvider;
+
     $this->client = ClientBuilder::create()
       ->addConnection($alias, $scheme, $host, $port, $auth, $user, $pass)
       ->setAutoFormatResponse(true)
@@ -93,5 +102,24 @@ class Neo {
     return $this->client->sendCypherQuery($query)->getResult();
   }
 
+  /**
+   * Gets the user provider for Neo.
+   *
+   * @return \Wetcat\Neo\Users\ProviderInterface
+   */
+  public function getUserProvider()
+  {
+    return $this->userProvider;
+  }
+
+  /**
+   * Gets the group provider for Neo.
+   *
+   * @return \Wetcat\Neo\Groups\ProviderInterface
+   */
+  public function getGroupProvider()
+  {
+    return $this->groupProvider;
+  }
  
 }
