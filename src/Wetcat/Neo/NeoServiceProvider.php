@@ -23,6 +23,8 @@ class NeoServiceProvider extends ServiceProvider {
   public function boot()
   {
     $this->package('wetcat/neo');
+
+    include __DIR__.'/filters.php';
   }
 
   /**
