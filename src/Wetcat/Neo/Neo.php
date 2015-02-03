@@ -144,16 +144,19 @@ class Neo {
   public function authenticate(array $credentials)
   {
     if (empty($credentials['email'])) {
-      throw new LoginRequiredException("The [email] attribute is required.");
+      //throw new LoginRequiredException("The [email] attribute is required.");
+      return false;
     }
     if (empty($credentials['password'])) {
-      throw new PasswordRequiredException('The password attribute is required.');
+      //throw new PasswordRequiredException('The password attribute is required.');
+      return false;
     }
 
     try {
       $user = $this->userProvider->findByCredentials($credentials);
     } catch (UserNotFoundException $e) {
-      throw $e;
+      //throw $e;
+      return false;
     }
     
 //    $user->clearResetPassword();
@@ -164,7 +167,7 @@ class Neo {
   /**
    * Gets the group provider for Neo.
    *
-   * @return \Wetcat\Neo\Groups\ProviderInterface
+   * @return bool
    */
   public function isAuthenticated($token) {
     // Attempting to find the user will automatically throw errors if unsuccessful
@@ -172,7 +175,8 @@ class Neo {
       $user = $this->userProvider->findByToken($token);
 
       if( ! (array_key_exists('email', $user) && array_key_exists('password', $user)) ){
-        throw new NotAuthenticatedException("The user with token [$token] is not authenticated.");
+        //throw new NotAuthenticatedException("The user with token [$token] is not authenticated.");
+        return false;
       } else {
         return true;
       }
@@ -180,10 +184,11 @@ class Neo {
       return false;
     }
   }
+
   /**
    * Gets the group provider for Neo.
    *
-   * @return \Wetcat\Neo\Groups\ProviderInterface
+   * @return bool
    */
   public function isAuthorized($token, $group) {
     // Attempting to find the user will automatically throw errors if unsuccessful
@@ -196,7 +201,8 @@ class Neo {
     
 
     if( $data === 0 ) {
-      throw new NotAuthorizedException("The user with token [$token] is not authorized [$group]");
+      //throw new NotAuthorizedException("The user with token [$token] is not authorized [$group]");
+      return false;
     } else if( $data === 1 ) {
       return true;
     }
