@@ -54,11 +54,13 @@ class RemoveSchemaCommand extends Command {
       ->setDefaultTimeout($timeout)
       ->build();
 
+    // Unset User label
     $client->dropUniqueConstraint('User', 'email');
-
     $client->dropIndex('User', 'firstname');
     $client->dropIndex('User', 'lastname');
-    $client->dropIndex('User', 'roles');
+
+    // Unset Group label
+    $client->dropUniqueConstraint('Group', 'name');
 	}
 
 }

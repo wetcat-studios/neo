@@ -54,11 +54,13 @@ class CreateSchemaCommand extends Command {
       ->setDefaultTimeout($timeout)
       ->build();
 
+    // Set up User label
     $client->createUniqueConstraint('User', 'email');
-
     $client->createIndex('User', 'firstname');
     $client->createIndex('User', 'lastname');
-    $client->createIndex('User', 'roles');
+
+    // Set up Group label
+    $client->createUniqueConstraint('Group', 'name');
 	}
 
 }
