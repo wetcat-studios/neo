@@ -2,6 +2,8 @@
 
 use Illuminate\Support\ServiceProvider;
 use Wetcat\Neo\Neo;
+use Wetcat\Neo\Users\Provider as UserProvider;
+use Wetcat\Neo\Groups\Provider as GroupProvider;
 
 class NeoServiceProvider extends ServiceProvider {
 
