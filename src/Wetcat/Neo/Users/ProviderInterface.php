@@ -36,20 +36,11 @@ interface ProviderInterface {
   /**
    * Finds a user by the login value.
    *
-   * @param  string  $login
+   * @param  string  $email
    * @return array
    * @throws \Wetcat\Neo\Users\UserNotFoundException
    */
-  public function findByLogin($login);
-
-  /**
-   * Finds a user by the given credentials.
-   *
-   * @param  array  $credentials
-   * @return array
-   * @throws \Wetcat\Neo\Users\UserNotFoundException
-   */
-  public function findByCredentials(array $credentials);
+  public function findByEmail($email);
 
   /**
    * Finds a user by the given activation code.
