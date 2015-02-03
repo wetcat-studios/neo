@@ -97,8 +97,8 @@ class NeoServiceProvider extends ServiceProvider {
       $timeout = $app['config']->get('database.neo.default.timeout', $app['config']->get('neo::default.timeout'));
     
       return new Neo(
-        $app['sentry.user'],
-        $app['sentry.group'],
+        $app['neo.user'],
+        $app['neo.group'],
         $alias, 
         $scheme, 
         $host, 
