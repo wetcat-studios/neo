@@ -28,17 +28,33 @@ class Neo {
       ->build();
   }
 
-  public function root(){
+  public function unique($label, $prop) {
+    $this->client->createUniqueConstraint($label, $prop);
+  }
+
+  public function dropUnique($label, $prop) {
+    $this->client->dropUniqueConstraint($label, $prop);
+  }
+
+  public function index($label, $prop) {
+    $this->client->createIndex($label, $prop);
+  }
+
+  public function dropIndex($label, $prop) {
+    $this->client->dropIndex($label, $prop);
+  }
+
+  public function root() {
     return $this->client->getRoot();
   }
 
-  public function allNodes(){
+  public function allNodes() {
     $query = "MATCH (n) RETURN n";
     $result = $this->client->sendCypherQuery($query)->getResult();
     return $result->getNodes();
   }
 
-  public function getGraph(){
+  public function getGraph() {
     $query = 'MATCH (a)<-[r]-(b) RETURN a, r, b';
 
     $result = $this->client->sendCypherQuery($query)->getResult();
@@ -73,7 +89,7 @@ class Neo {
     return $data;
   }
 
-  public function query($query){
+  public function query($query) {
     return $this->client->sendCypherQuery($query)->getResult();
   }
 
