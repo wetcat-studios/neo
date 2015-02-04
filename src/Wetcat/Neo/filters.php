@@ -13,26 +13,6 @@ use Neo;
 |
 */
 
-try {
-  $data = [
-    'error' => false,
-    'data'  => Neo::getUserProvider()->findAll(),
-    'code'  => 200
-  ];
-  $code = 200;
-  
-} catch ( Neoxygen\NeoClient\Exception\Neo4jException $e) {
-  $data = [
-    'error' => true,
-    'data'  => [$e->getMessage()],
-    'code'  => 404
-    ];
-  $code = 404;
-}
-
-return Response::json($data, $code);
-
-
 /*
  * Filter that checks that the authentication token is valid, if the token is not 
  * valid the filter aborts and resturns a JSON error.
