@@ -315,6 +315,35 @@ class Provider implements ProviderInterface {
   }
 
   /**
+   * Creates a user.
+   *
+   * @param  array  $attrs
+   * @return array
+   */
+  public function update(array $attrs)
+  {
+    if ( !array_key_exists("email", $attrs) ) {
+      throw new LoginRequiredException("[email] is required");
+    }
+
+    $email = $attrs['emails'];
+
+    $query = "MATCH (u:User {email: '$email'})";
+
+    // Loop through all the attributes and add them the node
+    $len = count($attrs);
+    foreach ($attrs as $key => $value) {
+      $query .= "SET ".$key."='".$value."' ";
+    }
+    $query .= "RETURN u";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
+    $userNode = $result->getSingleNode('User');
+
+    return $userNode->getProperties($this->attributes);
+  }
+
+  /**
    * Add a user (email) to a group (name)
    *
    * @param  string  $email
