@@ -1,4 +1,6 @@
-<?php
+<?php namespace Wetcat\Neo;
+
+use Neo;
 
 /*
 |--------------------------------------------------------------------------
@@ -10,9 +12,6 @@
 | integrates HTTP Basic authentication for quick, simple checking.
 |
 */
-
-
-
 
 try {
   $data = [
