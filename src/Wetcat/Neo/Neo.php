@@ -159,7 +159,7 @@ class Neo {
     try {
       $user = $this->userProvider->findByCredentials($credentials);
 
-      $user = $this->userProvider->generateToken($user->getProperty('email'));
+      $user = $this->userProvider->generateToken($user['email']);
 
       return $user['token'];
 
