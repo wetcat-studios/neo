@@ -322,6 +322,8 @@ class Provider implements ProviderInterface {
    */
   public function update(array $attrs)
   {
+    // TODO: This needs a credentials verification too!
+
     if ( !array_key_exists("email", $attrs) ) {
       throw new LoginRequiredException("[email] is required");
     }

@@ -144,19 +144,19 @@ class Neo {
   public function authenticate(array $credentials)
   {
     if (empty($credentials['email'])) {
-      //throw new LoginRequiredException("The [email] attribute is required.");
-      return false;
+      throw new LoginRequiredException("The [email] attribute is required.");
+      //return false;
     }
     if (empty($credentials['password'])) {
-      //throw new PasswordRequiredException('The password attribute is required.');
-      return false;
+      throw new PasswordRequiredException('The password attribute is required.');
+      //return false;
     }
 
     try {
       $user = $this->userProvider->findByCredentials($credentials);
     } catch (UserNotFoundException $e) {
-      //throw $e;
-      return false;
+      throw $e;
+      //return false;
     }
     
 //    $user->clearResetPassword();
