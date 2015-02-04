@@ -61,6 +61,19 @@ Route::filter('neoAuth', function ($route, $request){
 
 });
 
+/*
+ * Filter that checks that the authentication token is valid and that the use connect to
+ * this token is member of the "Admin" group. If one of these checks doesn't pass the
+ * filter aborts and resturns a JSON error.
+ *
+ * {
+ *   "error": true,
+ *   "data": {
+ *     ... error message/s ...
+ *   },
+ *   "code": 4xx
+ * }
+ */
 Route::filter('neoAdmin', function ($route, $request){
 
   $token = $request->header('X-Auth-Token');
