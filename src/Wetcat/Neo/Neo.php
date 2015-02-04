@@ -131,12 +131,11 @@ class Neo {
 
   // Auth stuff
   /**
-   * Attempts to authenticate the given user
-   * according to the passed credentials.
+   * Attempts to authenticate the given user according to the passed credentials.
+   * If it fails it will throw exceptions.
    *
    * @param  array  $credentials
    * @param  bool   $remember
-   * @return bool
    * @throws \Wetcat\Neo\Users\LoginRequiredException
    * @throws \Wetcat\Neo\Users\PasswordRequiredException
    * @throws \Wetcat\Neo\Users\UserNotFoundException
@@ -161,7 +160,7 @@ class Neo {
     
 //    $user->clearResetPassword();
 
-    return true;
+    //return true;
   }
 
   /**
