@@ -140,7 +140,7 @@ class Neo {
    * If it fails it will throw exceptions.
    *
    * @param  array  $credentials
-   * @param  bool   $remember
+   * @param  string  $token
    * @throws \Wetcat\Neo\Users\LoginRequiredException
    * @throws \Wetcat\Neo\Users\PasswordRequiredException
    * @throws \Wetcat\Neo\Users\UserNotFoundException
@@ -158,6 +158,8 @@ class Neo {
 
     try {
       $user = $this->userProvider->findByCredentials($credentials);
+
+      return $user->getProperty('token');
     } catch (UserNotFoundException $e) {
       throw $e;
       //return false;
