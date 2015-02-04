@@ -335,7 +335,7 @@ class Provider implements ProviderInterface {
     // Loop through all the attributes and add them the node
     $len = count($attrs);
     foreach ($attrs as $key => $value) {
-      $query .= "SET ".$key."='".$value."' ";
+      $query .= "SET u.".$key."='".$value."' ";
     }
     $query .= "RETURN u";
 
@@ -431,7 +431,7 @@ class Provider implements ProviderInterface {
     // Generate new token
     $token = hash('sha256', Str::random(10), false);
 
-    $query = "MATCH (u:User {email: '$email'}) SET token='$token'";
+    $query = "MATCH (u:User {email: '$email'}) SET u.token='$token'";
 
     $result = $this->client->sendCypherQuery($query)->getResult();
     $userNode = $result->getSingleNode('User');
