@@ -283,7 +283,7 @@ class Provider implements ProviderInterface {
   public function create(array $attrs)
   {
     if ( !array_key_exists("email", $attrs) ) {
-      throw new PasswordRequiredException("[email] is required");
+      throw new LoginRequiredException("[email] is required");
     }
 
     if ( !array_key_exists("password", $attrs) ) {
