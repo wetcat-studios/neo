@@ -282,9 +282,18 @@ class Provider implements ProviderInterface {
    */
   public function create(array $attrs)
   {
+    if ( !array_key_exists("email", $attrs) ) {
+      throw new PasswordRequiredException("[email] is required");
+    }
+
+    if ( !array_key_exists("password", $attrs) ) {
+      throw new PasswordRequiredException("[password] is required");
+    }
+
     // Hash password
     $attrs['password'] = Hash::make($attrs['password']);
-    
+  
+    // Create initial token
     $attrs['token'] = hash('sha256', Str::random(10), false);
 
     $query = "CREATE (u:User {";
