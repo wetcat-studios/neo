@@ -159,7 +159,10 @@ class Neo {
     try {
       $user = $this->userProvider->findByCredentials($credentials);
 
-      return $user->getProperty('token');
+      $user = $this->userProvider->generateToken($user->getProperty('email'));
+
+      return $user['token'];
+
     } catch (UserNotFoundException $e) {
       throw $e;
       //return false;

@@ -417,4 +417,26 @@ class Provider implements ProviderInterface {
     return $member;
   }
 
+  /*
+   * Generate a new token for user
+   */
+  public function generateToken($email)
+  {
+    // TODO: This needs a credentials verification too!
+
+    if ( ! $email ) {
+      throw new LoginRequiredException("[email] is required");
+    }
+
+    // Generate new token
+    $token = hash('sha256', Str::random(10), false);
+
+    $query = "MATCH (u:User {email: '$email'}) SET token='$token'";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
+    $userNode = $result->getSingleNode('User');
+
+    return $userNode->getProperties($this->attributes);
+  }
+
 }
