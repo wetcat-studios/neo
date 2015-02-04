@@ -2,9 +2,14 @@
 
 use Wetcat\Neo\Users\ProviderInterface as UserProviderInterface;
 use Wetcat\Neo\Groups\ProviderInterface as GroupProviderInterface;
+
 use Wetcat\Neo\NotAuthenticatedException;
 use Wetcat\Neo\NotAuthorizedException;
+
 use Wetcat\Neo\Users\InvalidTokenException;
+use Wetcat\Neo\Users\PasswordRequiredException;
+use Wetcat\Neo\Users\LoginRequiredException;
+use Wetcat\Neo\Users\UserNotFoundException;
 
 use Neoxygen\NeoClient\ClientBuilder;
 
