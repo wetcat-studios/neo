@@ -149,6 +149,7 @@ class Provider implements ProviderInterface {
     if (empty($credentials['email'])) {
       throw new LoginRequiredException("The [email] attribute is required.");
     }
+
     if (empty($credentials['password'])) {
       throw new PasswordRequiredException('The password attribute is required.');
     }
@@ -159,7 +160,11 @@ class Provider implements ProviderInterface {
     $result = $this->client->sendCypherQuery($query)->getResult();
     $userNode = $result->getSingleNode('User');
 
-    if (Hash::check($credentials['password'], $userNode->getProperty('password'))) {
+    if( ! $userNode ) {
+      throw new UserNotFoundException("User with [email] $email could not be found.");
+    }
+
+    if ( Hash::check($credentials['password'], $userNode->getProperty('password')) ) {
       return $userNode->getProperties($this->attributes);
     } else {
       throw new UserNotFoundException("A user could not be found with the given credentials.");
