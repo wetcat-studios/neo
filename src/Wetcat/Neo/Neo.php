@@ -152,7 +152,7 @@ class Neo {
       //return false;
     }
     if (empty($credentials['password'])) {
-      throw new PasswordRequiredException('The password attribute is required.');
+      throw new PasswordRequiredException('The [password] attribute is required.');
       //return false;
     }
 

@@ -156,7 +156,7 @@ class Provider implements ProviderInterface {
 
     $email = $credentials['email'];
 
-    $query = "MATCH (u:User {email: '$email'})-[r:MEMBER_OF]->(g:Group) RETURN u, g, r";
+    $query = "MATCH (u:User {email: '$email'}) OPTIONAL MATCH (u)-[r:MEMBER_OF]->(g:Group) RETURN u, g, r";
     $result = $this->client->sendCypherQuery($query)->getResult();
     
     $user = $result->getSingleNode('User');
