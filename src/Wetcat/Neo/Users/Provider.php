@@ -151,21 +151,35 @@ class Provider implements ProviderInterface {
     }
 
     if (empty($credentials['password'])) {
-      throw new PasswordRequiredException('The password attribute is required.');
+      throw new PasswordRequiredException('The [password] attribute is required.');
     }
 
     $email = $credentials['email'];
 
-    $query = "MATCH (u:User {email: '$email'}) RETURN u";
+    $query = "MATCH (u:User {email: '$email'})-[r:MEMBER_OF]->(g:Group) RETURN u, g, r";
     $result = $this->client->sendCypherQuery($query)->getResult();
-    $userNode = $result->getSingleNode('User');
-
-    if( ! $userNode ) {
-      throw new UserNotFoundException("User with [email] $email could not be found.");
+    
+    $user = $result->getSingleNode('User');
+    
+    if( ! $user ) {
+      throw new UserNotFoundException("User with [$email] could not be found.");
     }
 
-    if ( Hash::check($credentials['password'], $userNode->getProperty('password')) ) {
-      return $userNode->getProperties($this->attributes);
+    $relationships = $user->getRelationships('MEMBER_OF', 'OUT');
+
+    $groups = [];
+
+    foreach ($relationships as $rel) {
+      $groups[] = [
+        'name'  => $rel->getEndNode()->getProperty('name'),
+        'since' => $rel->getProperty('since'),
+      ];
+    }
+
+    if ( Hash::check($credentials['password'], $user->getProperty('password')) ) {
+      $data = $user->getProperties($this->attributes);
+      $data['groups'] = $groups;
+      return $data;
     } else {
       throw new UserNotFoundException("A user could not be found with the given credentials.");
     }
@@ -441,7 +455,7 @@ class Provider implements ProviderInterface {
     $result = $this->client->sendCypherQuery($query)->getResult();
     $userNode = $result->getSingleNode('User');
 
-    return $userNode->getProperties($this->attributes);
+    return $token;
   }
 
 }

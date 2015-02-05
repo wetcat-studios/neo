@@ -158,10 +158,13 @@ class Neo {
 
     try {
       $user = $this->userProvider->findByCredentials($credentials);
+      $token = $this->userProvider->generateToken($user['email']);
 
-      $user = $this->userProvider->generateToken($user['email']);
-
-      return $user['token'];
+      return [
+        'userId' => $user['email'],
+        'token'  => $token,
+        'permissions' => $user['groups']
+      ];
 
     } catch (UserNotFoundException $e) {
       throw $e;
