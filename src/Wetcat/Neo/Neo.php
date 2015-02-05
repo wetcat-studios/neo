@@ -219,5 +219,16 @@ class Neo {
       return true;
     }
   }
+
+  /**
+   * Attempt to unset token
+   */
+  public function logout($token) {
+    try {
+      $this->userProvider->unsetToken($token);
+    } catch (\Wetcat\Neo\Users\InvalidTokenException $e) {
+      return false;
+    } 
+  }
  
 }

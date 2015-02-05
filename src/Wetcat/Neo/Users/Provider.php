@@ -458,4 +458,16 @@ class Provider implements ProviderInterface {
     return $token;
   }
 
+  public function unsetToken($token) {
+    $query = "MATCH (u:User {token: '$token'}) REMOVE u.token RETURN u";
+    $result = $this->client->sendCypherQuery($query)->getResult();
+    $user = $result->getSingleNode('User');
+
+    if( ! $user ){
+      throw new InvalidTokenException("Token [$token] is invalid.");
+    }
+
+    return $user->getProperties($this->attributes);
+  }
+
 }
