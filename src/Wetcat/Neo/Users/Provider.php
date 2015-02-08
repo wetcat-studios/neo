@@ -172,6 +172,7 @@ class Provider implements ProviderInterface {
     foreach ($relationships as $rel) {
       $groups[] = [
         'name'  => $rel->getEndNode()->getProperty('name'),
+        'level' => $rel->getEndNode()->getProperty('level'),
         'since' => $rel->getProperty('since'),
       ];
     }
