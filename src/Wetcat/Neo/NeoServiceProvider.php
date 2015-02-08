@@ -126,9 +126,14 @@ class NeoServiceProvider extends ServiceProvider {
       return new RemoveSchemaCommand();
     });
 
+    $this->app->bind('wetcat::neo.group', function($app) {
+      return new CreateNeoGroups();
+    });
+
     $this->commands(array(
         'wetcat::neo.create',
-        'wetcat::neo.remove'
+        'wetcat::neo.remove',
+        'wetcat::neo.group'
     ));
   }
 
