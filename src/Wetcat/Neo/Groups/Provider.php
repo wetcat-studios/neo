@@ -36,6 +36,7 @@ class Provider implements ProviderInterface {
 
   protected $attributes = [
     'name',
+    'level',
   ];
 
   /**
@@ -88,8 +89,8 @@ class Provider implements ProviderInterface {
    * Find the group by name.
    *
    * @param  string  $name
-   * @return \Cartalyst\Sentry\Groups\GroupInterface  $group
-   * @throws \Cartalyst\Sentry\Groups\GroupNotFoundException
+   * @return array  $group
+   * @throws \Wetcat\Neo\Groups\GroupNotFoundException
    */
   public function findByName($name)
   {

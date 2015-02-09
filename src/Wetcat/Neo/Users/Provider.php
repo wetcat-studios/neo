@@ -124,17 +124,31 @@ class Provider implements ProviderInterface {
    */
   public function findByToken($token)
   {
-    $query = "MATCH (u:User {token: '$token'}) RETURN u";
+    $query = "MATCH (u:User {token: '$token'}) OPTIONAL MATCH (u)-[r:MEMBER_OF]->(g) RETURN u, r, g";
 
     $result = $this->client->sendCypherQuery($query)->getResult();
+
     $userNode = $result->getSingleNode('User');
+    $data = $userNode->getProperties($this->attributes);
+
+    $relationships = $userNode->getRelationships('MEMBER_OF', 'OUT');
+    $groups = [];
+    foreach ($relationships as $rel) {
+      $groups[] = [
+        'name'  => $rel->getEndNode()->getProperty('name'),
+        'level' => $rel->getEndNode()->getProperty('level'),
+        'since' => $rel->getProperty('since')
+      ];
+    }
+
+    $data['groups'] = $groups;
 
     if ( !$userNode )
     {
       throw new InvalidTokenException("The token [$token] is invalid.");
     }
 
-    return $userNode->getProperties($this->attributes);
+    return $data;
   }
 
   /**

@@ -203,21 +203,44 @@ class Neo {
    * @return bool
    */
   public function isAuthorized($token, $group) {
+    $hasPermission = false;
+
+    $user = false;
+    $requiredGroup = false;
+
     // Attempting to find the user will automatically throw errors if unsuccessful
     try {
+      if( $group !== '*' ){
+        // Get the needed group
+        $requiredGroup = $this->groupProvider->findByName($group);        
+      }
+
+      // Get the user, including the memberships
       $user = $this->userProvider->findByToken($token);
-      $data = $this->userProvider->isMemberOf($user['email'], $group);
+
+      //$data = $this->userProvider->isMemberOf($user['email'], $group);
     } catch (\Wetcat\Neo\Users\InvalidTokenException $e) {
-      return false;
+      $hasPermission = false;
     }
     
-
-    if( $data === 0 ) {
-      //throw new NotAuthorizedException("The user with token [$token] is not authorized [$group]");
-      return false;
-    } else if( $data === 1 ) {
+    // If the group is '*' it means everyone has permission, but has to be authenticated!
+    // That's why we do this check after the token-check
+    if ( $group === '*' ) {
       return true;
     }
+
+    if( !$user || !$requiredGroup ) {
+      $hasPermission = false;
+    } else {
+      // Compare user permissions to required
+      foreach ($user['groups'] as $group) {
+        if( $group['level'] >= $requiredGroup['level'] ){
+          $hasPermission = true;
+        }
+      }
+    }
+
+    return $hasPermission;
   }
 
   /**
