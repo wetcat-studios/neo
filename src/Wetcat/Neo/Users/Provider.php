@@ -129,6 +129,12 @@ class Provider implements ProviderInterface {
     $result = $this->client->sendCypherQuery($query)->getResult();
 
     $userNode = $result->getSingleNode('User');
+
+    if ( !$userNode )
+    {
+      throw new InvalidTokenException("The token [$token] is invalid.");
+    }
+    
     $data = $userNode->getProperties($this->attributes);
 
     $relationships = $userNode->getRelationships('MEMBER_OF', 'OUT');
@@ -142,11 +148,6 @@ class Provider implements ProviderInterface {
     }
 
     $data['groups'] = $groups;
-
-    if ( !$userNode )
-    {
-      throw new InvalidTokenException("The token [$token] is invalid.");
-    }
 
     return $data;
   }
