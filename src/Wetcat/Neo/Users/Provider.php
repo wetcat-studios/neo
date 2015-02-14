@@ -328,16 +328,30 @@ class Provider implements ProviderInterface {
       throw new PasswordRequiredException("[password] is required");
     }
 
+    // Start the query
+    $query = "";
+
+    // If the group variable is set (!= null) then attempt to find the group
+    // We separate the MATCH and the CREATE statement because MATCH has to come first in Cypher
+    if ( $group !== null ) {
+      $query .= "MATCH (g:Group {name: '$group'}) ";
+    }
+
     // Hash password
     $attrs['password'] = Hash::make($attrs['password']);
   
     // Create initial token
     $attrs['token'] = hash('sha256', Str::random(10), false);
 
-    $query = "CREATE (u:User {";
+    $query .= "CREATE (u:User {";
+    $len = count($attrs);
+    $i = 0;
     foreach ($attrs as $key => $value) {
       $query .= $key.": '".$value."'";
-      $query .= ", ";
+      $i++;
+      if( $i < $len ){
+        $query .= ", ";
+      }
     }
     $query .= "}) ";
 
@@ -345,14 +359,15 @@ class Provider implements ProviderInterface {
     $query .= "SET u.created_at='$created_at', ";
     $query .= "u.updated_at='$updated_at' ";
 
-    // If the group variable is set (!= null) then attempt to find the group and add the user to that group
+    // Finally, connect the user and the group
     if ( $group !== null ) {
-      "MATCH (g:Group {name: '$group'} CREATE (u)->[:MEMBER_OF {since: '$created_at'}]->(g) ";
+      $query .= "CREATE (u)-[:MEMBER_OF {since: '$created_at'}]->(g) ";
     }
 
     // Return the user and group
     $query .= "RETURN u, g";
 
+return $query;
     $result = $this->client->sendCypherQuery($query)->getResult();
     $userNode = $result->getSingleNode('User');
 
