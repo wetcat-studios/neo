@@ -315,8 +315,11 @@ class Provider implements ProviderInterface {
    * @param  array  $attrs
    * @return array
    */
-  public function create(array $attrs)
-  {
+  public function create(array $attrs, $group = null)
+  { 
+    $created_at = date("Y-m-d H:i:s");
+    $updated_at = $created_at;
+    
     if ( !array_key_exists("email", $attrs) ) {
       throw new LoginRequiredException("[email] is required");
     }
@@ -332,16 +335,23 @@ class Provider implements ProviderInterface {
     $attrs['token'] = hash('sha256', Str::random(10), false);
 
     $query = "CREATE (u:User {";
-    $len = count($attrs);
-    $i = 0;
     foreach ($attrs as $key => $value) {
       $query .= $key.": '".$value."'";
-      $i++;
-      if( $i < $len ){
-        $query .= ", ";
-      }
+      $query .= ", ";
     }
-    $query .= "}) RETURN u";
+    $query .= "}) ";
+
+    // Set the created_at and updated_at params
+    $query .= "SET u.created_at='$created_at', ";
+    $query .= "u.updated_at='$updated_at' ";
+
+    // If the group variable is set (!= null) then attempt to find the group and add the user to that group
+    if ( $group !== null ) {
+      "MATCH (g:Group {name: '$group'} CREATE (u)->[:MEMBER_OF {since: '$created_at'}]->(g) ";
+    }
+
+    // Return the user and group
+    $query .= "RETURN u, g";
 
     $result = $this->client->sendCypherQuery($query)->getResult();
     $userNode = $result->getSingleNode('User');
