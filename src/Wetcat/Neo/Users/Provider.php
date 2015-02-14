@@ -367,7 +367,6 @@ class Provider implements ProviderInterface {
     // Return the user and group
     $query .= "RETURN u, g";
 
-return $query;
     $result = $this->client->sendCypherQuery($query)->getResult();
     $userNode = $result->getSingleNode('User');
 
