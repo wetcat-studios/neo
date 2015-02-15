@@ -44,7 +44,11 @@ class Provider implements ProviderInterface {
     'lastname',
     'email',
     'password',
-    'token'
+    'token',
+
+    'created_at',
+    'updated_at',
+    'deleted_at'
   ];
 
   /**

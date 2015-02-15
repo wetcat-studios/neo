@@ -37,6 +37,10 @@ class Provider implements ProviderInterface {
   protected $attributes = [
     'name',
     'level',
+
+    'created_at',
+    'updated_at',
+    'deleted_at'
   ];
 
   /**
