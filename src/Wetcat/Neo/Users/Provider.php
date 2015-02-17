@@ -391,7 +391,7 @@ class Provider implements ProviderInterface {
       throw new LoginRequiredException("[email] is required");
     }
 
-    $email = $attrs['emails'];
+    $email = $attrs['email'];
 
     $query = "MATCH (u:User {email: '$email'})";
 
