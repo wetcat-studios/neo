@@ -387,13 +387,13 @@ class Provider implements ProviderInterface {
   {
     // TODO: This needs a credentials verification too!
 
-    if ( !array_key_exists("email", $attrs) ) {
-      throw new LoginRequiredException("[email] is required");
+    if ( !array_key_exists("token", $attrs) ) {
+      throw new LoginRequiredException("[token] is required");
     }
 
-    $email = $attrs['email'];
+    $token = $attrs['token'];
 
-    $query = "MATCH (u:User {email: '$email'})";
+    $query = "MATCH (u:User {token: '$token'})";
 
     // Loop through all the attributes and add them the node
     $len = count($attrs);
