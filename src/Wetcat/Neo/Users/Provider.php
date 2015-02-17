@@ -380,18 +380,13 @@ class Provider implements ProviderInterface {
   /**
    * Creates a user.
    *
+   * @param string $token
    * @param  array  $attrs
    * @return array
    */
-  public function update(array $attrs)
+  public function update($token, array $attrs)
   {
     // TODO: This needs a credentials verification too!
-
-    if ( !array_key_exists("token", $attrs) ) {
-      throw new LoginRequiredException("[token] is required");
-    }
-
-    $token = $attrs['token'];
 
     $query = "MATCH (u:User {token: '$token'})";
 
