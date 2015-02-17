@@ -249,6 +249,7 @@ class Neo {
   public function logout($token) {
     try {
       $this->userProvider->unsetToken($token);
+      return true;
     } catch (\Wetcat\Neo\Users\InvalidTokenException $e) {
       return false;
     } 
