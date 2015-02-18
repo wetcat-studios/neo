@@ -500,12 +500,32 @@ class Provider implements ProviderInterface {
     return $token;
   }
 
-  public function unsetToken($token) {
+  public function unsetToken($token)
+  {
     $query = "MATCH (u:User {token: '$token'}) REMOVE u.token RETURN u";
     $result = $this->client->sendCypherQuery($query)->getResult();
     $user = $result->getSingleNode('User');
 
-    if( ! $user ){
+    if ( ! $user ) {
+      throw new InvalidTokenException("Token [$token] is invalid.");
+    }
+
+    return $user->getProperties($this->attributes);
+  }
+
+  /*
+   * Delete a user, this is a soft delete that only removes a token and sets the
+   * deleted_at timestamp.
+   */
+  public function delete($token)
+  {
+    $deleted_at = date("Y-m-d H:i:s");
+
+    $query = "MATCH (u:User {token: '$token'}) SET u.deleted_at='$deleted_at' REMOVE u.token RETURN u";
+    $result = $this->client->sendCypherQuery($query)->getResult();
+    $user = $result->getSingleNode('User');
+
+    if ( ! $user ) {
       throw new InvalidTokenException("Token [$token] is invalid.");
     }
 
