@@ -386,15 +386,18 @@ class Provider implements ProviderInterface {
    */
   public function update($token, array $attrs)
   {
+    $updated_at = date("Y-m-d H:i:s");
+    
     // TODO: This needs a credentials verification too!
 
     $query = "MATCH (u:User {token: '$token'})";
 
-    // Loop through all the attributes and add them the node
-    $len = count($attrs);
     foreach ($attrs as $key => $value) {
-      $query .= "SET u.".$key."='".$value."' ";
+      $query .= "SET u.$key='$value', ";
     }
+    
+    $query .= "u.updated_at='$updated_at' "
+
     $query .= "RETURN u";
 
     $result = $this->client->sendCypherQuery($query)->getResult();
