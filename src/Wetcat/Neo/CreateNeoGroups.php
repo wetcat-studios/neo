@@ -63,7 +63,10 @@ class CreateNeoGroups extends Command {
     $this->line("{$name} has level {$level}.");
 
     try {
-    	$query = "CREATE (g:Group {name: '".$name."', level: ".$level."})";
+      $created_at = date("Y-m-d H:i:s");
+      $updated_at = $created_at;
+      
+    	$query = "CREATE (g:Group {name: '$name', level: $level, created_at: '$created_at', updated_at: '$updated_at'})";
 			$result = $client->sendCypherQuery($query)->getResult();
     } catch ( Neoxygen\NeoClient\Exception\Neo4jException $e ) {
     	$this->error($e->getMessage());
