@@ -396,7 +396,7 @@ class Provider implements ProviderInterface {
       $query .= "SET u.$key='$value', ";
     }
     
-    $query .= "u.updated_at='$updated_at' "
+    $query .= "u.updated_at='$updated_at' ";
 
     $query .= "RETURN u";
 
