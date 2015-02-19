@@ -51,6 +51,10 @@ class Provider implements ProviderInterface {
     'deleted_at'
   ];
 
+  protected $hidden = [
+    'password'
+  ];
+
   /**
    * Create a new Neo User provider.
    *
@@ -94,7 +98,8 @@ class Provider implements ProviderInterface {
       throw new UserNotFoundException("A user could not be found with ID [$id].");
     }
 
-    return $userNode->getProperties($this->attributes);
+    //return $userNode->getProperties($this->attributes);
+    return $userNode->getProperties();
   }
 
   /**
@@ -116,7 +121,8 @@ class Provider implements ProviderInterface {
       throw new UserNotFoundException("A user could not be found with a email value of [$email].");
     }
 
-    return $userNode->getProperties($this->attributes);
+    //return $userNode->getProperties($this->attributes);
+    return $userNode->getProperties();
   }
 
   /**
@@ -139,7 +145,8 @@ class Provider implements ProviderInterface {
       throw new InvalidTokenException("The token [$token] is invalid.");
     }
     
-    $data = $userNode->getProperties($this->attributes);
+    //$data = $userNode->getProperties($this->attributes);
+    $data = $userNode->getProperties();
 
     $relationships = $userNode->getRelationships('MEMBER_OF', 'OUT');
     $groups = [];
@@ -197,7 +204,8 @@ class Provider implements ProviderInterface {
     }
 
     if ( Hash::check($credentials['password'], $user->getProperty('password')) ) {
-      $data = $user->getProperties($this->attributes);
+      //$data = $user->getProperties($this->attributes);
+      $data = $user->getProperties();
       $data['groups'] = $groups;
       return $data;
     } else {
@@ -237,7 +245,8 @@ class Provider implements ProviderInterface {
       throw new UserNotFoundException("A user was not found with the given activation code.");
     }
 
-    return $userNode->getProperties($this->attributes);
+    //return $userNode->getProperties($this->attributes);
+    return $userNode->getProperties();
   }
 
   /**
@@ -266,7 +275,8 @@ class Provider implements ProviderInterface {
       throw new UserNotFoundException("A user was not found with the given reset password code.");
     }
 
-    return $userNode->getProperties($this->attributes);
+    //return $userNode->getProperties($this->attributes);
+    return $userNode->getProperties();
   }
 
   /**
@@ -284,7 +294,8 @@ class Provider implements ProviderInterface {
     $data = [];
 
     foreach ($nodes as $node) {
-      $data[] = $node->getProperties($this->attributes);
+      //$data[] = $node->getProperties($this->attributes);
+      $data[] = $node->getProperties();
     }
 
     return $data;
@@ -307,7 +318,8 @@ class Provider implements ProviderInterface {
     $data = [];
 
     foreach ($nodes as $node) {
-      $data[] = $node->getProperties($this->attributes);
+      //$data[] = $node->getProperties($this->attributes);
+      $data[] = $node->getProperties();
     }
 
     return $data;
@@ -374,7 +386,8 @@ class Provider implements ProviderInterface {
     $result = $this->client->sendCypherQuery($query)->getResult();
     $userNode = $result->getSingleNode('User');
 
-    return $userNode->getProperties($this->attributes);
+    //return $userNode->getProperties($this->attributes);
+    return $userNode->getProperties();
   }
 
   /**
@@ -403,7 +416,8 @@ class Provider implements ProviderInterface {
     $result = $this->client->sendCypherQuery($query)->getResult();
     $userNode = $result->getSingleNode('User');
 
-    return $userNode->getProperties($this->attributes);
+    //return $userNode->getProperties($this->attributes);
+    return $userNode->getProperties();
   }
 
   /**
@@ -504,13 +518,14 @@ class Provider implements ProviderInterface {
   {
     $query = "MATCH (u:User {token: '$token'}) REMOVE u.token RETURN u";
     $result = $this->client->sendCypherQuery($query)->getResult();
-    $user = $result->getSingleNode('User');
+    $userNode = $result->getSingleNode('User');
 
-    if ( ! $user ) {
+    if ( ! $userNode ) {
       throw new InvalidTokenException("Token [$token] is invalid.");
     }
 
-    return $user->getProperties($this->attributes);
+    //return $user->getProperties($this->attributes);
+    return $userNode->getProperties();
   }
 
   /*
@@ -523,13 +538,14 @@ class Provider implements ProviderInterface {
 
     $query = "MATCH (u:User {token: '$token'}) SET u.deleted_at='$deleted_at' REMOVE u.token RETURN u";
     $result = $this->client->sendCypherQuery($query)->getResult();
-    $user = $result->getSingleNode('User');
+    $userNode = $result->getSingleNode('User');
 
-    if ( ! $user ) {
+    if ( ! $userNode ) {
       throw new InvalidTokenException("Token [$token] is invalid.");
     }
 
-    return $user->getProperties($this->attributes);
+    //return $user->getProperties($this->attributes);
+    return $userNode->getProperties();
   }
 
 }
