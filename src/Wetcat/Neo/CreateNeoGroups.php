@@ -7,6 +7,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Config;
 use Neoxygen\NeoClient\ClientBuilder;
 
+use Webpatser\Uuid;
+
 class CreateNeoGroups extends Command {
 
 	/**
@@ -66,6 +68,10 @@ class CreateNeoGroups extends Command {
       $created_at = date("Y-m-d H:i:s");
       $updated_at = $created_at;
       
+      // Create a unique ID
+      $uuid = Uuid::generate(4);
+      $attrs['uuid'] = $uuid->string;
+
     	$query = "CREATE (g:Group {name: '$name', level: $level, created_at: '$created_at', updated_at: '$updated_at'})";
 			$result = $client->sendCypherQuery($query)->getResult();
     } catch ( Neoxygen\NeoClient\Exception\Neo4jException $e ) {

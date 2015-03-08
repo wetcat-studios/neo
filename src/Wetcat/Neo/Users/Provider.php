@@ -34,6 +34,8 @@ use Str;
 use Neoxygen\NeoClient\ClientBuilder;
 use Carbon\Carbon;
 
+use Webpatser\Uuid;
+
 class Provider implements ProviderInterface {
 
   // Neo4j client
@@ -358,6 +360,10 @@ class Provider implements ProviderInterface {
   
     // Create initial token
     $attrs['token'] = hash('sha256', Str::random(10), false);
+
+    // Create a unique ID
+    $uuid = Uuid::generate(4);
+    $attrs['uuid'] = $uuid->string;
 
     $query .= "CREATE (u:User {";
     $len = count($attrs);

@@ -29,6 +29,8 @@ use Config;
 
 use Neoxygen\NeoClient\ClientBuilder;
 
+use Webpatser\Uuid;
+
 class Provider implements ProviderInterface {
 
   // Neo4j client
@@ -172,6 +174,10 @@ class Provider implements ProviderInterface {
    */
   public function create(array $attrs)
   {
+    // Create a unique ID
+    $uuid = Uuid::generate(4);
+    $attrs['uuid'] = $uuid->string;
+
     $query = "CREATE (g:Group {";
     $len = count($attrs);
     $i = 0;
