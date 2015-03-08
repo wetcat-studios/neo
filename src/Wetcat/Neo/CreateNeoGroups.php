@@ -70,9 +70,9 @@ class CreateNeoGroups extends Command {
       
       // Create a unique ID
       $uuid = Uuid::generate(4);
-      $attrs['uuid'] = $uuid->string;
+      $uniqueId = $uuid->string;
 
-    	$query = "CREATE (g:Group {name: '$name', level: $level, created_at: '$created_at', updated_at: '$updated_at'})";
+    	$query = "CREATE (g:Group {name: '$name', level: $level, created_at: '$created_at', updated_at: '$updated_at', uuid: '$uniqueId'})";
 			$result = $client->sendCypherQuery($query)->getResult();
     } catch ( Neoxygen\NeoClient\Exception\Neo4jException $e ) {
     	$this->error($e->getMessage());
