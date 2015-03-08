@@ -7,7 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Config;
 use Neoxygen\NeoClient\ClientBuilder;
 
-use Webpatser\Uuid;
+use Webpatser\Uuid\Uuid;
 
 class CreateNeoGroups extends Command {
 

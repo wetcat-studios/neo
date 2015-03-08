@@ -34,7 +34,7 @@ use Str;
 use Neoxygen\NeoClient\ClientBuilder;
 use Carbon\Carbon;
 
-use Webpatser\Uuid;
+use Webpatser\Uuid\Uuid;
 
 class Provider implements ProviderInterface {
 

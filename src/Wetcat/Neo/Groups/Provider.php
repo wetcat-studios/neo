@@ -29,7 +29,7 @@ use Config;
 
 use Neoxygen\NeoClient\ClientBuilder;
 
-use Webpatser\Uuid;
+use Webpatser\Uuid\Uuid;
 
 class Provider implements ProviderInterface {
 

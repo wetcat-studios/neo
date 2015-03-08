@@ -57,11 +57,13 @@ class CreateSchemaCommand extends Command {
 
     // Set up User label
     $client->createUniqueConstraint('User', 'email');
+    $client->createUniqueConstraint('User', 'uuid');
     $client->createIndex('User', 'firstname');
     $client->createIndex('User', 'lastname');
 
     // Set up Group label
     $client->createUniqueConstraint('Group', 'name');
+    $client->createUniqueConstraint('Group', 'uuid');
 	}
 
 }
