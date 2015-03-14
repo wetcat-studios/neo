@@ -554,4 +554,20 @@ class Provider implements ProviderInterface {
     return $userNode->getProperties();
   }
 
+  public function findByKey($key, $val)
+  {
+    $query = "MATCH (u:User) WHERE u.$key='$val' RETURN u";
+
+    $result = $this->client->sendCypherQuery($query)->getResult();
+    $userNode = $result->getSingleNode('User');
+
+    if ( !$userNode )
+    {
+      throw new UserNotFoundException("A user could not be found with ID [$id].");
+    }
+
+    //return $userNode->getProperties($this->attributes);
+    return $userNode->getProperties();
+  }
+
 }
